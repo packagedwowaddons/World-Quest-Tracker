@@ -1,0 +1,31 @@
+name: package
+
+on:
+  push:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+env:
+  GITHUB_OAUTH: ${{ secrets.RELEASE_TOKEN }}
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: package
+        uses: bigwigsmods/packager@v2
+      
+      - name: export commit date
+        id: set_date
+        run: echo "::set-output name=date::$(git show -s --format=%at)"
+
+      - name: create release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: .release/**
+          tag_name: ${{ steps.set_date.outputs.date }}
